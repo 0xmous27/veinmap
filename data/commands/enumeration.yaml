@@ -1,0 +1,26 @@
+commands:
+  enumeration:
+    - description: "Full TCP port scan"
+      command: "nmap -sC -sV -p- -oA full_tcp {IP}"
+    - description: "Quick top ports scan"
+      command: "nmap -sC -sV --top-ports 1000 -oA quick {IP}"
+    - description: "UDP scan (top 100)"
+      command: "nmap -sU --top-ports 100 -oA udp {IP}"
+    - description: "Service version detection"
+      command: "nmap -sV -p {PORT} {IP}"
+    - description: "OS detection"
+      command: "nmap -O {IP}"
+    - description: "Vulnerability scan"
+      command: "nmap --script vuln -p {PORT} {IP}"
+  dns:
+    - description: "Zone transfer attempt"
+      command: "dig axfr @{IP} {DOMAIN}"
+    - description: "Subdomain brute force"
+      command: "gobuster dns -d {DOMAIN} -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt -r {IP}"
+    - description: "Reverse DNS lookup"
+      command: "nmap -sL 10.10.14.0/24 2>/dev/null | grep '(' | awk '{print $5, $6}'"
+  snmp:
+    - description: "SNMP walk (public community)"
+      command: "snmpwalk -v2c -c public {IP}"
+    - description: "SNMP brute community strings"
+      command: "onesixtyone -c /usr/share/seclists/Discovery/SNMP/snmp.txt {IP}"

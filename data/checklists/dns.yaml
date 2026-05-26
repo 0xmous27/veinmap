@@ -1,0 +1,29 @@
+service: dns
+ports: [53]
+categories:
+  enumeration:
+    - id: dns_zone_transfer
+      description: "Attempt zone transfer"
+      command: "dig axfr @{IP} {DOMAIN}"
+      priority: high
+    - id: dns_reverse
+      description: "Reverse DNS lookup on subnet"
+      command: "dnsrecon -r 10.10.14.0/24 -n {IP}"
+      priority: medium
+    - id: dns_subdomain
+      description: "Subdomain brute force"
+      command: "gobuster dns -d {DOMAIN} -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt -r {IP}"
+      priority: high
+    - id: dns_any
+      description: "Query ANY records"
+      command: "dig ANY @{IP} {DOMAIN}"
+      priority: medium
+    - id: dns_srv
+      description: "Enumerate SRV records (AD)"
+      command: "dig SRV _ldap._tcp.{DOMAIN} @{IP}"
+      priority: high
+  exploitation:
+    - id: dns_cache_snoop
+      description: "DNS cache snooping"
+      command: "nmap --script dns-cache-snoop -p 53 {IP}"
+      priority: low

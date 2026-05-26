@@ -1,0 +1,29 @@
+service: smtp
+ports: [25, 465, 587]
+categories:
+  enumeration:
+    - id: smtp_banner
+      description: "Grab SMTP banner"
+      command: "nmap -sV -p 25 {IP}"
+      priority: high
+    - id: smtp_vrfy
+      description: "Enumerate users via VRFY"
+      command: "smtp-user-enum -M VRFY -U users.txt -t {IP}"
+      priority: high
+    - id: smtp_rcpt
+      description: "Enumerate users via RCPT TO"
+      command: "smtp-user-enum -M RCPT -U users.txt -t {IP}"
+      priority: high
+    - id: smtp_nmap
+      description: "SMTP nmap scripts"
+      command: "nmap --script smtp-commands,smtp-enum-users,smtp-open-relay -p 25 {IP}"
+      priority: high
+  exploitation:
+    - id: smtp_relay
+      description: "Test open relay"
+      command: "nmap --script smtp-open-relay -p 25 {IP}"
+      priority: medium
+    - id: smtp_phish
+      description: "Send phishing email (if relay open)"
+      command: "swaks --to victim@target.com --from admin@target.com --server {IP} --body 'Click here'"
+      priority: medium

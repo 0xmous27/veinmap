@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "veinmap"
+version = "0.1.0"
+description = "CLI penetration testing engagement tracker for CPTS and AD assessments"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+authors = [{name = "0xmous27"}]
+dependencies = [
+    "typer>=0.12.0",
+    "rich>=13.0.0",
+    "pyyaml>=6.0",
+    "jinja2>=3.1.0",
+]
+
+[project.scripts]
+veinmap = "veinmap.cli:app"
+
+[tool.setuptools.packages.find]
+include = ["veinmap*"]
